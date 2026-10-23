@@ -1,43 +1,106 @@
-% =====================================================================
-% Literaturdatenbank. Eintraege bekommt ihr per "Zitieren -> BibTeX"
-% aus Google Scholar, Zotero, IEEE Xplore, ACM DL usw.
-% Zitiert wird im Text mit \cite{schluessel}.
-% =====================================================================
-
-@book{beispiel-buch,
-  author    = {Vorname Nachname},
-  title     = {Titel des Buchs},
-  subtitle  = {Untertitel, falls vorhanden},
-  publisher = {Verlag},
-  year      = {2024},
-  edition   = {2},
-  isbn      = {978-3-16-148410-0},
-}
-
-@article{beispiel-artikel,
-  author  = {Erste Autorin and Zweiter Autor},
-  title   = {Titel des Fachartikels},
-  journal = {Name der Fachzeitschrift},
-  year    = {2023},
-  volume  = {12},
-  number  = {4},
-  pages   = {101--115},
-  doi     = {10.1000/beispiel},
-}
-
-@online{beispiel-online,
-  author  = {Name der Organisation},
-  title   = {Titel der Webseite},
+@online{pe-format,
+  author  = {{Microsoft}},
+  title   = {PE Format},
   year    = {2026},
-  url     = {https://www.example.org/dokumentation},
-  urldate = {2026-08-12},
+  url     = {https://learn.microsoft.com/en-us/windows/win32/debug/pe-format},
+  urldate = {2026-10-23},
 }
 
-% Quelle der Beispielabbildung. Genau so wird eine fremde Grafik belegt.
-@online{nasa-blue-marble,
-  author  = {{NASA}},
-  title   = {AS17-148-22727 (Blue Marble)},
-  year    = {1972},
-  url     = {https://images.nasa.gov/details/as17-148-22727},
-  urldate = {2026-08-12},
+@online{sha256-spec,
+  author  = {{National Institute of Standards and Technology (NIST)}},
+  title   = {Secure Hash Standard (SHS), FIPS 180-4},
+  year    = {2015},
+  url     = {https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf},
+  urldate = {2026-10-23},
+}
+
+@inproceedings{tlsh-paper,
+  author    = {Jonathan Oliver and Chun Cheng and Yanggui Chen},
+  title     = {TLSH -- A Locality Sensitive Hash},
+  booktitle = {4th Cybercrime and Trustworthy Computing Workshop},
+  year      = {2013},
+  address   = {Sydney, Australia},
+  url       = {https://github.com/trendmicro/tlsh/blob/master/TLSH_CTC_final.pdf},
+  urldate   = {2026-10-23},
+}
+
+@online{yara-docs,
+  author  = {{YARA}},
+  title   = {YARA Documentation},
+  year    = {2026},
+  url     = {https://yara.readthedocs.io/},
+  urldate = {2026-10-23},
+}
+
+@inproceedings{xgboost-paper,
+  author    = {Tianqi Chen and Carlos Guestrin},
+  title     = {XGBoost: A Scalable Tree Boosting System},
+  booktitle = {Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining},
+  year      = {2016},
+  pages     = {785--794},
+  doi       = {10.1145/2939672.2939785},
+  url       = {https://arxiv.org/abs/1603.02754},
+  urldate   = {2026-10-23},
+}
+
+@inproceedings{lightgbm-paper,
+  author    = {Guolin Ke and Qi Meng and Thomas Finley and Taifeng Wang and Wei Chen and Weidong Ma and Qiwei Ye and Tie-Yan Liu},
+  title     = {LightGBM: A Highly Efficient Gradient Boosting Decision Tree},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  volume    = {30},
+  year      = {2017},
+  url       = {https://papers.nips.cc/paper/6907-lightgbm-a-highly-efficient-gradient-boosting-decision-tree},
+  urldate   = {2026-10-23},
+}
+
+@online{ember-paper,
+  author  = {Hyrum S. Anderson and Phil Roth},
+  title   = {EMBER: An Open Dataset for Training Static PE Malware Machine Learning Models},
+  year    = {2018},
+  url     = {https://arxiv.org/abs/1804.04637},
+  urldate = {2026-10-23},
+}
+
+@online{etw-docs,
+  author  = {{Microsoft}},
+  title   = {About Event Tracing},
+  year    = {2026},
+  url     = {https://learn.microsoft.com/en-us/windows/win32/etw/about-event-tracing},
+  urldate = {2026-10-23},
+}
+
+@online{sysmon-docs,
+  author  = {{Microsoft}},
+  title   = {Sysmon -- Sysinternals},
+  year    = {2026},
+  url     = {https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon},
+  urldate = {2026-10-23},
+}
+
+@online{frida-docs,
+  author  = {{Frida}},
+  title   = {Frida Documentation},
+  year    = {2026},
+  url     = {https://frida.re/docs/home/},
+  urldate = {2026-10-23},
+}
+
+@online{cape-sandbox,
+  author  = {Kevin O'Reilly},
+  title   = {CAPEv2 -- Config And Payload Extraction Sandbox},
+  year    = {2026},
+  url     = {https://github.com/kevoreilly/CAPEv2},
+  urldate = {2026-10-23},
+}
+
+@article{lstm-paper,
+  author  = {Sepp Hochreiter and J{\"u}rgen Schmidhuber},
+  title   = {Long Short-Term Memory},
+  journal = {Neural Computation},
+  year    = {1997},
+  volume  = {9},
+  number  = {8},
+  pages   = {1735--1780},
+  doi     = {10.1162/neco.1997.9.8.1735},
+  url     = {https://www.bioinf.jku.at/publications/older/2604.pdf},
 }

@@ -1,29 +1,169 @@
 \chapter{Technische Grundlagen}
-\abschnittsautor{M. Musterfrau}
+\section{Signaturbasierte Erkennung und maschinelles Lernen}
+\abschnittsautor{Arslan Yunus}
 
-Hier steht alles, was zum Verständnis der praktischen Umsetzung nötig ist --
-und nur das. Jede Technologie, die ihr später verwendet, wird hier einmal
-erklärt und belegt.
+Dieser Abschnitt erklärt die Grundlagen der ersten Erkennungsphase des
+Systems: wie Dateien anhand von Hashes, Mustern und maschinellem Lernen
+als gut- oder bösartig eingestuft werden.
 
-\section{Teilbereich A}
+\subsection{Das PE-Dateiformat}
 
-Beim ersten Auftreten schreibt ihr eine Abkürzung aus: \ac{API}. Danach
-genügt die Kurzform: \ac{API}. Alle Abkürzungen sammelt ihr in
-\texttt{diplomarbeit.tex} im Abkürzungsverzeichnis.
+Ausführbare Dateien unter Windows liegen im \ac{PE}-Format vor
+(Portable Executable). Eine solche Datei besteht aus einem Header mit
+Metadaten (z.\,B. Zielarchitektur, Einsprungpunkt) sowie mehreren
+Sections, etwa \texttt{.text} für den ausführbaren Code oder
+\texttt{.rsrc} für Ressourcen. Der Header enthält außerdem eine
+Import-Tabelle, die auflistet, welche externen Funktionen die Datei beim
+Start nachlädt~\cite{pe-format}. Diese Struktur ist wichtig, weil genau
+diese Informationen später als Merkmale zur Erkennung von Schadsoftware
+genutzt werden.
 
-\subsection{Ein Unterabschnitt}
+\subsection{Kryptografische Hashfunktionen}
 
-Zitiert wird im IEEE-Stil mit einer Nummer in eckigen
-Klammern~\cite{beispiel-artikel}. Mehrere Quellen auf einmal gehen
-auch~\cite{beispiel-buch,beispiel-online}.
+Eine Hashfunktion wie \ac{SHA}-256 wandelt eine beliebig lange Datei in
+einen festen, kurzen Wert um. Schon eine winzige Änderung an der Datei
+(ein einziges verändertes Byte) erzeugt dabei einen komplett anderen
+Hashwert~\cite{sha256-spec}. Dadurch lassen sich bekannte
+Malware-Dateien eindeutig identifizieren, indem man ihren Hash mit einer
+Datenbank bekannter Schadsoftware vergleicht. Das Problem: Ändert ein
+Angreifer auch nur eine Kleinigkeit am Code, ändert sich der Hash
+komplett und die Erkennung schlägt fehl.
 
-\subsubsection{Eine Ebene tiefer}
+\subsection{Fuzzy Hashing mit TLSH}
 
-Die vierte Ebene könnt ihr verwenden, aber sparsam. Sie wird nummeriert,
-steht aber nicht mehr im Inhaltsverzeichnis. Tiefer gliedert ihr nicht.
+\ac{TLSH} (Trend Micro Locality Sensitive Hash) löst genau dieses
+Problem: Im Gegensatz zu \ac{SHA}-256 erzeugt \ac{TLSH} für ähnliche
+Dateien auch ähnliche Hashwerte. Man kann also zwei Hashes vergleichen
+und eine Zahl bekommen, die angibt, wie ähnlich sich die Originaldateien
+sind~\cite{tlsh-paper}. Dadurch erkennt das System auch leicht
+abgewandelte Varianten einer bekannten Malware-Familie, selbst wenn der
+klassische Hash längst nicht mehr passt.
 
-\section{Teilbereich B}
+\subsection{Regelbasierte Mustererkennung mit YARA}
 
-Erklärt Technologien in eurer eigenen Formulierung. Wörtlich übernommene
-Passagen gehören in Anführungszeichen und mit Seitenangabe belegt, sonst gilt
-das als Plagiat.
+\ac{YARA} erlaubt es, eigene Erkennungsregeln zu schreiben: Eine Regel
+definiert eine Liste von verdächtigen Text- oder Byte-Mustern (z.\,B.
+bestimmte Zeichenketten oder Code-Fragmente) sowie eine Bedingung, wie
+viele davon in einer Datei vorkommen müssen, damit sie als schädlich
+gilt~\cite{yara-docs}. So lassen sich ganze Malware-Familien an
+typischen Merkmalen erkennen, auch wenn sich einzelne Dateien im Detail
+unterscheiden.
+
+\subsection{Gradient Boosting: XGBoost und LightGBM}
+
+Für die eigentliche Klassifikation (gutartig vs. bösartig) kommt
+maschinelles Lernen zum Einsatz, konkret \ac{XGBoost} und
+\ac{LightGBM}. Beide funktionieren nach dem Prinzip des Gradient
+Boosting: Es wird eine Reihe einfacher Entscheidungsbäume nacheinander
+trainiert, wobei jeder neue Baum gezielt die Fehler der vorherigen Bäume
+ausbessert~\cite{xgboost-paper}. \ac{LightGBM} ist dabei eine schnellere
+Variante desselben Prinzips, optimiert für sehr große
+Datenmengen~\cite{lightgbm-paper}. Beide Modelle eignen sich gut für
+tabellarische Daten -- also genau die Art von Merkmalen, die man aus
+einer \ac{PE}-Datei extrahieren kann.
+
+\subsection{Merkmalsextraktion aus PE-Dateien}
+
+Damit ein Modell wie \ac{XGBoost} überhaupt etwas lernen kann, muss jede
+Datei zuerst in Zahlen umgewandelt werden. Typische Merkmale sind die
+Entropie einzelner Sections (ein Maß dafür, wie "zufällig" die Daten
+aussehen -- hohe Werte deuten oft auf verschlüsselten oder gepackten
+Code hin), die Liste der importierten Funktionen sowie
+Header-Informationen~\cite{ember-paper}. Diese Merkmale bilden gemeinsam
+den Eingabevektor für das Modell und ersetzen die starre
+Signaturprüfung durch eine lernbasierte, verallgemeinerbare Erkennung.
+
+\section{Verhaltensbasierte Überwachung und Sequenzanalyse}
+\abschnittsautor{Dervishi Drilon}
+
+Dieser Abschnitt erklärt die Grundlagen der zweiten Erkennungsphase des
+Systems: wie das Verhalten eines Programms zur Laufzeit beobachtet und
+auf verdächtige Muster hin analysiert wird -- unabhängig davon, wie die
+Datei selbst aussieht.
+
+\subsection{Warum Verhaltensanalyse}
+
+Signaturbasierte Methoden (siehe vorheriger Abschnitt) scheitern, sobald
+Angreifer ihren Code gezielt verändern, um Hashes und Muster zu umgehen.
+Schadsoftware muss jedoch, egal wie sie verpackt ist, zur Laufzeit
+bestimmte Aktionen ausführen -- Dateien verändern, Prozesse starten,
+Netzwerkverbindungen aufbauen. Die verhaltensbasierte Überwachung setzt
+genau hier an: Statt die Datei selbst zu analysieren, wird beobachtet,
+was ein Programm tut, nachdem es gestartet wurde.
+
+\subsection{Event Tracing for Windows (ETW)}
+
+\ac{ETW} ist ein in Windows eingebautes Protokollierungssystem, das
+Systemereignisse wie Dateizugriffe, Prozessstarts oder
+Registry-Änderungen in Echtzeit erfasst, ohne dass eine zusätzliche
+Software tief ins Betriebssystem eingreifen muss~\cite{etw-docs}.
+Programme (sogenannte Provider) senden Ereignisse an den ETW-Kernel, von
+wo aus sie durch Consumer-Anwendungen ausgelesen werden können. Für das
+System bedeutet das: ein performanter, bereits im Betriebssystem
+vorhandener Kanal, über den sich verdächtiges Verhalten beobachten
+lässt, ohne das System spürbar zu verlangsamen.
+
+\subsection{Sysmon}
+
+\ac{Sysmon} (System Monitor) ist ein kostenloses
+Microsoft-Sysinternals-Tool, das auf \ac{ETW} aufbaut und detaillierte,
+sicherheitsrelevante Ereignisse protokolliert -- etwa Prozesserstellung
+mit vollständiger Kommandozeile, Netzwerkverbindungen oder Änderungen an
+Autostart-Einträgen~\cite{sysmon-docs}. Über eine XML-Konfigurationsdatei
+lässt sich genau festlegen, welche Ereignistypen protokolliert werden
+sollen. Sysmon liefert damit die rohen, strukturierten Verhaltensdaten,
+die im System als Grundlage für die spätere Sequenzanalyse dienen.
+
+\subsection{API-Hooking mit Frida}
+
+Während \ac{ETW} und \ac{Sysmon} Ereignisse auf Betriebssystemebene
+protokollieren, erlaubt Frida einen noch tieferen Einblick: Es klinkt
+sich direkt in den Prozessspeicher eines laufenden Programms ein und
+kann einzelne Funktionsaufrufe (\ac{API}-Calls) abfangen, bevor oder
+nachdem sie ausgeführt werden~\cite{frida-docs}. Dadurch lässt sich
+beispielsweise genau mitverfolgen, mit welchen Parametern eine
+verdächtige Funktion wie \texttt{VirtualAllocEx} aufgerufen wurde --
+Informationen, die über \ac{ETW} allein nicht sichtbar wären. Frida
+wird im System eingesetzt, um besonders relevante \ac{API}-Aufrufe
+(z.\,B. Prozess- und Speicherfunktionen) mit zusätzlichem Kontext
+anzureichern.
+
+\subsection{CAPE Sandbox}
+
+Da verdächtige Samples nicht auf einem produktiven System ausgeführt
+werden dürfen, kommt \ac{CAPE} (Config And Payload Extraction) als
+automatisierte Sandbox-Umgebung zum Einsatz. \ac{CAPE} führt eine Datei
+in einer isolierten virtuellen Maschine aus, zeichnet dabei sämtliche
+Systemaufrufe, Netzwerkaktivität und Prozessverhalten auf und kann
+zusätzlich automatisch Konfigurationsdaten aus bekannten
+Malware-Familien extrahieren~\cite{cape-sandbox}. Im System liefert
+\ac{CAPE} damit vollständige, sichere Verhaltensprotokolle, die als
+Trainingsgrundlage für das Sequenzmodell dienen.
+
+\subsection{Long Short-Term Memory (LSTM)}
+
+Die gesammelten Verhaltensdaten (Reihenfolge von \ac{API}-Aufrufen,
+Prozess- und Dateiereignissen) bilden eine zeitliche Abfolge -- eine
+Sequenz. Um solche Sequenzen zu klassifizieren, wird ein \ac{LSTM}
+eingesetzt, eine spezielle Art von rekurrentem neuronalen Netz. Im
+Unterschied zu einfachen neuronalen Netzen kann sich ein \ac{LSTM} über
+viele Zeitschritte hinweg relevante Informationen "merken" und
+irrelevante vergessen, gesteuert über sogenannte Gates (Input-, Forget-
+und Output-Gate)~\cite{lstm-paper}. Dadurch eignet sich das Modell
+besonders gut, um langfristige Verhaltensmuster zu erkennen -- etwa
+wenn ein Programm erst nach mehreren Minuten unauffälligen Verhaltens
+beginnt, verdächtige Aktionen durchzuführen (zeitverzögerte
+Payload-Ausführung), was rein momentbasierte Methoden übersehen würden.
+
+\subsection{Von Rohdaten zur Sequenz}
+
+Bevor die \ac{LSTM}-Architektur trainiert werden kann, müssen die
+rohen Ereignisse aus \ac{ETW}, \ac{Sysmon} und Frida in eine
+einheitliche, zeitlich geordnete Sequenz überführt werden --
+typischerweise als Folge von kategorisierten Ereignistypen (z.\,B.
+ProcessCreate, FileWrite, NetworkConnect), die anschließend in
+numerische Vektoren (Embeddings) umgewandelt werden, damit das Modell
+damit rechnen kann. Diese Aufbereitung entspricht im Verhaltensbereich
+dem, was die Merkmalsextraktion (Abschnitt zuvor) für statische Dateien
+leistet: Sie macht rohe, heterogene Daten für ein lernbasiertes Modell
+nutzbar.
