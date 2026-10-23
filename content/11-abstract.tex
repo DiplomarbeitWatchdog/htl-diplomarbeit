@@ -4,16 +4,12 @@
 % =====================================================================
 
 \kurzfassung{%
-Die Kurzfassung beschreibt in wenigen Absätzen, worum es in der Arbeit geht:
-Ausgangsproblem, gewählter Lösungsansatz, umgesetztes Ergebnis und der Nutzen
-für die Anwenderinnen und Anwender. Sie muss ohne den Rest der Arbeit
-verständlich sein.
+Herkömmliche Antivirus-Software erkennt Schadsoftware primär über bekannte Signaturen und versagt zunehmend bei polymorpher, bisher unbekannter Malware. Zudem bleiben viele KI-basierte Lösungen in ihren Entscheidungen intransparent. Ziel dieser Diplomarbeit ist ein lokal arbeitendes, mehrstufiges Erkennungssystem, das statische Signaturprüfung, verhaltensbasierte Analyse und erklärbare KI kombiniert, um bekannte wie neuartige Bedrohungen zuverlässig und nachvollziehbar zu erkennen bei vollständiger Datenhoheit ohne Cloud-Abhängigkeit.
 
-Der zweite Absatz beschreibt üblicherweise die technische Umsetzung auf
-Überblicksebene: welche Komponenten entstanden sind und wie sie zusammenspielen.
+Das System gliedert sich in drei Phasen: Eine signaturbasierte Phase prüft Dateien mittels YARA, TLSH Fuzzy Hashing und einem XGBoost/LightGBM-Klassifikator. Eine verhaltensbasierte Phase überwacht Systemereignisse über ETW, Sysmon und Frida API-Hooking in Kombination mit CAPE Sandbox und einem LSTM-Modell. Eine XAI-Phase macht Entscheidungen mittels SHAP, Captum und MITRE-ATT\&CK-Mapping für Analysten nachvollziehbar. Die Umsetzung erfolgt vollständig in Python; der Fokus liegt aktuell auf Scanner und Erkennungslogik, eine Dashboard-Oberfläche folgt später.
 
-Der letzte Absatz fasst das Ergebnis zusammen und benennt den erzielten
-Mehrwert.
+Im Ergebnis entsteht ein funktionsfähiger Prototyp, der die Lücke zwischen reiner Signaturerkennung und intransparenter KI-Klassifikation schließt. Der Mehrwert liegt in hoher Erkennungsrate gegenüber Zero-Day-Malware, vollständig lokaler Verarbeitung und forensisch nachvollziehbaren Erklärungen für jede Entscheidung.
+
 }
 
 \abstracttext{%
