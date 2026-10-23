@@ -1,6 +1,10 @@
+
+\pagebreak
+
 \chapter{Technische Grundlagen}
-\section{Signaturbasierte Erkennung und maschinelles Lernen}
 \abschnittsautor{Arslan Yunus}
+
+\section{Signaturbasierte Erkennung und maschinelles Lernen}
 
 Dieser Abschnitt erklärt die Grundlagen der ersten Erkennungsphase des
 Systems: wie Dateien anhand von Hashes, Mustern und maschinellem Lernen
@@ -49,6 +53,40 @@ gilt~\cite{yara-docs}. So lassen sich ganze Malware-Familien an
 typischen Merkmalen erkennen, auch wenn sich einzelne Dateien im Detail
 unterscheiden.
 
+\subsection{Whitelisting vertrauenswürdiger Software}
+
+Neben der Erkennung bösartiger Dateien ist das gezielte Freigeben
+bekannter, vertrauenswürdiger Software ein ebenso wichtiger Baustein der
+signaturbasierten Phase. Beim Whitelisting wird der Hash (siehe
+vorheriger Abschnitt) einer Datei gegen eine Liste bekannter, geprüfter
+Software abgeglichen -- stammt eine Datei nachweislich von einem
+vertrauenswürdigen Hersteller, wird sie von der weiteren, rechenintensiveren
+Analyse (Verhaltensüberwachung, Klassifikation) ausgenommen. Das reduziert
+sowohl die Systemlast als auch die Zahl potenzieller Fehlalarme, da
+bekanntermaßen harmlose Systemdateien und verbreitete Anwendungen nicht
+bei jedem Start erneut vollständig analysiert werden müssen. Eine robuste
+Whitelist ist damit eine notwendige Ergänzung zur reinen
+Blacklist-Erkennung, denn ohne sie würde ein rein verhaltens- oder
+KI-basiertes System deutlich mehr falsch-positive Meldungen erzeugen.
+
+\subsection{Multi-Engine-Abgleich mit VirusTotal}
+
+Ergänzend zur eigenen Hash- und Mustererkennung nutzt das System die
+\ac{API} von VirusTotal, einem Online-Dienst, der eine eingereichte
+Datei oder deren Hash gegen eine Vielzahl unabhängiger Antiviren-Engines
+gleichzeitig prüft und ein aggregiertes Ergebnis zurückliefert, wie viele
+der Engines die Datei als bösartig einstufen~\cite{virustotal-docs}. Der
+entscheidende Vorteil gegenüber einer einzelnen, lokal betriebenen
+Engine liegt in der Konsens-Bildung: Stufen mehrere unabhängige Anbieter
+eine Datei übereinstimmend als schädlich ein, erhöht das die
+Verlässlichkeit der Entscheidung deutlich gegenüber einer Einzelmeinung.
+Da die kostenlose Public API auf wenige Anfragen pro Minute limitiert
+ist, wird sie im System primär als ergänzende Bestätigungsinstanz
+eingesetzt und nicht als alleinige Erkennungsgrundlage -- die
+eigentliche Klassifikation erfolgt weiterhin lokal über die im Folgenden
+beschriebenen Modelle, um die Datenhoheit zu wahren und nicht bei jeder
+Datei auf eine externe Cloud-Anfrage angewiesen zu sein.
+
 \subsection{Gradient Boosting: XGBoost und LightGBM}
 
 Für die eigentliche Klassifikation (gutartig vs. bösartig) kommt
@@ -73,8 +111,9 @@ Header-Informationen~\cite{ember-paper}. Diese Merkmale bilden gemeinsam
 den Eingabevektor für das Modell und ersetzen die starre
 Signaturprüfung durch eine lernbasierte, verallgemeinerbare Erkennung.
 
-\section{Verhaltensbasierte Überwachung und Sequenzanalyse}
+\pagebreak 
 \abschnittsautor{Dervishi Drilon}
+\section{Verhaltensbasierte Überwachung und Sequenzanalyse}
 
 Dieser Abschnitt erklärt die Grundlagen der zweiten Erkennungsphase des
 Systems: wie das Verhalten eines Programms zur Laufzeit beobachtet und
